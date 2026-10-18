@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Statue of Laocoön</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Italiana&family=Outfit:wght@300;400;600&family=Playfair+Display:ital,wght@1,500&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+html, body { width: 100%; margin: 0; padding: 0; background-color: #000000; -ms-overflow-style: none; scrollbar-width: none; }
+body { min-height: 900vh; font-family: 'Outfit', sans-serif; color: #ffffff; overflow-x: hidden; cursor: none; }
+* { cursor: none !important; }
+::-webkit-scrollbar { display: none; width: 0; }
+#webgl { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; outline: none; }
+
+.cursor-inner { position: fixed; top: 0; left: 0; width: 6px; height: 6px; border: 2px solid rgba(255,255,255,1); border-radius: 50%; transform: translate(-50%,-50%); pointer-events: none; z-index: 9999; }
+.cursor-outer { position: fixed; top: 0; left: 0; width: 40px; height: 40px; border: 1.5px solid rgba(255,255,255,0.7); border-radius: 50%; transform: translate(-50%,-50%); pointer-events: none; z-index: 9998; transition: width 0.3s, height 0.3s, background 0.3s; }
+.cursor-outer.hover { width: 64px; height: 64px; background: rgba(255,255,255,0.08); }
+
+.cinematic-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 0 60px 40px 60px; box-sizing: border-box; }
+.main-header { display: flex; justify-content: space-between; align-items: center; width: 100%; z-index: 20; pointer-events: auto; padding: 20px 0; }
+.brand { font-size: 14px; font-weight: 600; letter-spacing: 5px; text-transform: uppercase; }
+.header-nav { display: flex; align-items: center; gap: 24px; }
+.nav-link { color: #ffffff; text-decoration: none; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; font-weight: 500; transition: color 0.3s; }
+.nav-link:hover { color: #ffffff; }
+.nav-dot { width: 3px; height: 3px; background: rgba(255,255,255,0.2); border-radius: 50%; }
+.contact-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; background: #ffffff; color: #000000; text-decoration: none; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; border-radius: 20px; transition: transform 0.3s, background 0.3s; }
+.btn-circle { display: inline-block; width: 6px; height: 6px; border: 1px solid #000000; border-radius: 50%; background: transparent; }
+.contact-btn:hover { transform: scale(1.05); background: #f0f0f0; }
+
+.slide { position: absolute; bottom: 12%; pointer-events: none; }
+#slide-1 { left: 0; width: 100%; }
+#slide-1 .slide-title { margin-left: 60px; }
+#slide-1 .desc-row { position: relative; display: flex; width: 100%; }
+#slide-1 .col-1 { margin-left: 60px; width: calc(25vw - 60px); max-width: calc(25vw - 60px); }
+#slide-1 .col-2 { position: absolute; left: calc(25vw + 40px); width: calc(25vw - 60px); max-width: calc(25vw - 60px); }
+#slide-2 { left: 0; width: 100%; }
+#slide-2-img { position: fixed; top: 90px; left: 60px; width: calc(25vw - 60px); aspect-ratio: 1 / 1; overflow: hidden; z-index: 2; pointer-events: none; clip-path: inset(0 0 100% 0); transition: clip-path 1.8s cubic-bezier(0.16,1,0.3,1), opacity 0.8s ease; opacity: 0; }
+#slide-2-img img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.15); transition: transform 1.8s cubic-bezier(0.16,1,0.3,1); }
+#slide-2-img.active { clip-path: inset(0 0 0 0); opacity: 1; }
+#slide-2-img.active img { transform: scale(1); }
+#slide-2 .slide-title { margin-left: calc(25vw + 40px); }
+#slide-2 .slide-desc { margin-left: calc(50vw + 20px); width: calc(25vw - 60px); max-width: calc(25vw - 60px); }
+#slide-3 { left: calc(50vw + 20px); width: calc(25vw - 60px); max-width: calc(25vw - 60px); }
+#slide-3 .slide-title { white-space: nowrap; }
+#slide-4 { left: calc(25% + 40px); max-width: 600px; }
+
+.slide-title { font-family: 'Italiana', serif; font-size: 116px; line-height: 1.0; font-weight: 400; letter-spacing: 2px; margin-bottom: 20px; color: #fff6ed; }
+.slide-desc { font-size: 16px; line-height: 1.7; font-weight: 300; color: #d1d5db; letter-spacing: 0.5px; opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.25,1,0.5,1), transform 0.8s cubic-bezier(0.25,1,0.5,1); transition-delay: 0.4s; }
+.slide.active .slide-desc { opacity: 1; transform: translateY(0); }
+.slide-title .char { display: inline-block; opacity: 0; transform: translateY(50px); filter: blur(12px); transition: opacity 0.8s cubic-bezier(0.25,1,0.5,1), transform 0.8s cubic-bezier(0.25,1,0.5,1), filter 0.8s cubic-bezier(0.25,1,0.5,1); }
+.slide.active .slide-title .char { opacity: 1; transform: translateY(0); filter: blur(0); }
+.slide.active { pointer-events: auto; }
+
+.story-dashes { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); display: flex; flex-direction: column; gap: 12px; }
+.story-dash { width: 2px; height: 40px; background: rgba(255,255,255,0.15); border-radius: 2px; }
+.story-dash-fill { width: 100%; height: 0%; background: #ffffff; border-radius: 2px; }
+.grid-horizontal-line { position: fixed; top: 70px; left: 0; right: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.12); z-index: 5; pointer-events: none; }
+.grid-lines { position: fixed; top: 0; left: 40px; right: 40px; width: calc(100% - 80px); height: 100vh; display: flex; justify-content: space-between; z-index: 5; pointer-events: none; }
+.grid-line { position: relative; width: 1px; height: 100%; background: rgba(255,255,255,0.12); }
+.grid-line:nth-child(3) { margin-top: 70px; height: calc(100vh - 70px); }
+.grid-dot { position: absolute; left: 50%; transform: translate(-50%,-50%); width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.35); box-shadow: 0 0 4px rgba(255,255,255,0.15); }
+
+@media (max-width: 900px) {
+  .cinematic-container { padding: 0 24px 30px; }
+  .header-nav { display: none; }
+  .slide-title { font-size: 56px; }
+  #slide-1 .slide-title, #slide-1 .col-1 { margin-left: 24px; }
+  #slide-1 .col-1 { width: 70vw; max-width: 70vw; }
+  #slide-1 .col-2 { display: none; }
+  #slide-2 .slide-title, #slide-2 .slide-desc, #slide-3, #slide-4 { margin-left: 24px; left: 24px; width: 70vw; max-width: 70vw; }
+  #slide-2-img { left: 24px; width: 40vw; }
+}
+</style>
+</head>
+<body>
+<div class="cursor-inner"></div>
+<div class="cursor-outer"></div>
+
+<div class="cinematic-container">
+  <div class="main-header">
+    <div class="brand">Laocoön</div>
+    <nav class="header-nav">
+      <a href="#slide-1" class="nav-link">Bronze</a><span class="nav-dot"></span>
+      <a href="#slide-2" class="nav-link">Marble</a><span class="nav-dot"></span>
+      <a href="#slide-3" class="nav-link">Fluid</a><span class="nav-dot"></span>
+      <a href="#slide-4" class="nav-link">Digital</a>
+    </nav>
+    <div class="header-actions"><a href="#" class="contact-btn">Contact <span class="btn-circle"></span></a></div>
+  </div>
+
+  <div class="slide" id="slide-1">
+    <h2 class="slide-title">Bronze <br>and Time</h2>
+    <div class="desc-row">
+      <p class="slide-desc col-1">A timeless material holding centuries of human history. Fluid in hot flames, eternal in its form. Each curve captures a tense, dramatic moment.</p>
+      <p class="slide-desc col-2">Born of molten fire and creative will, it stands to bridge our ancient memory and modern vision. A fluid energy frozen in still, heavy bronze.</p>
+    </div>
+  </div>
+  <div class="slide-image-mask" id="slide-2-img"><img src="" alt="Editorial Concept"></div>
+  <div class="slide" id="slide-2">
+    <h2 class="slide-title">Marble <br>Emotion</h2>
+    <p class="slide-desc">A sculpture frozen at the peak of human suffering and heroic struggle. Laocoön and his sons, bound by ruthless fate.</p>
+  </div>
+  <div class="slide" id="slide-3">
+    <h2 class="slide-title">Liquid Metal</h2>
+    <p class="slide-desc">Art that breathes. Mesmerizing waves of liquid bronze flow through space, reflecting every contour and tensed muscle of the ancient masterpiece.</p>
+  </div>
+  <div class="slide" id="slide-4">
+    <h2 class="slide-title">Eternal <br>Moment</h2>
+    <p class="slide-desc">Contemplating antique form through the lens of new dimensions. A classic masterpiece reborn in the currents of radiant digital matter.</p>
+  </div>
+</div>
+
+<div class="grid-horizontal-line"></div>
+<div class="grid-lines">
+  <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+  <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+  <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+  <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+  <div class="grid-line story-progress-container">
+    <div class="grid-dot top"></div><div class="grid-dot bottom"></div>
+    <div class="story-dashes">
+      <div class="story-dash"><div class="story-dash-fill" id="dash-fill-1"></div></div>
+      <div class="story-dash"><div class="story-dash-fill" id="dash-fill-2"></div></div>
+      <div class="story-dash"><div class="story-dash-fill" id="dash-fill-3"></div></div>
+      <div class="story-dash"><div class="story-dash-fill" id="dash-fill-4"></div></div>
+    </div>
+  </div>
+</div>
+
+<canvas id="webgl"></canvas>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/examples/jsm/loaders/GLTFLoader.js": "https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+// Set this to the folder hosting bronze_horse.glb and 1.png
+const ASSET_BASE_URL = './assets';
+document.querySelector('#slide-2-img img').src = ASSET_BASE_URL + '/1.png';
+
+const canvas = document.querySelector('#webgl');
+let scene, camera, renderer, gltfModel, modelPivot, mixer;
+const clock = new THREE.Clock();
+let currentScroll = 0;
+let mouseX = 0, mouseY = 0, targetMouseX = 0, targetMouseY = 0;
+let cursorX = innerWidth / 2, cursorY = innerHeight / 2;
+let outerCursorX = innerWidth / 2, outerCursorY = innerHeight / 2;
+let bgMaterial;
+const shaderUniforms = {
+  uTime: { value: 0 },
+  uResolution: { value: new THREE.Vector2(innerWidth, innerHeight) },
+  uMouse: { value: new THREE.Vector2(0, 0) },
+  uScroll: { value: 0 }
+};
+let sparkParticles;
+const sparkCount = 450;
+const sparkData = [];
+const sizes = { width: innerWidth, height: innerHeight };
+
+scene = new THREE.Scene();
+scene.background = new THREE.Color('#000000');
+scene.fog = new THREE.FogExp2('#000000', 0.01);
+camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 100);
+camera.position.set(0, 0.2, 3.0);
+scene.add(camera);
+
+function createBackgroundShader() {
+  const dist = 40;
+  const h = 2 * dist * Math.tan(THREE.MathUtils.degToRad(25)) * 1.2;
+  const w = h * (sizes.width / sizes.height) * 1.2;
+  bgMaterial = new THREE.ShaderMaterial({
+    uniforms: shaderUniforms,
+    depthWrite: false, depthTest: false,
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `
+      precision highp float;
+      varying vec2 vUv;
+      uniform float uTime; uniform vec2 uResolution; uniform vec2 uMouse; uniform float uScroll;
+      void main(){
+        vec2 uv = vUv;
+        float aspect = uResolution.x / uResolution.y;
+        vec2 p = (uv - 0.5) * vec2(aspect, 1.0) * 2.0;
+        p += uMouse * 0.05;
+        float t = uTime * 0.12;
+        float w = 0.0;
+        for (float i = 1.0; i < 5.0; i++) {
+          p.x += 0.45 / i * sin(i * 2.1 * p.y + t + i * 1.7);
+          p.y += 0.45 / i * cos(i * 1.8 * p.x + t * 1.3 + i);
+        }
+        w = 0.5 + 0.5 * sin(p.x + p.y + t);
+        float band = smoothstep(0.35, 0.95, w);
+        vec3 bronzeDark = vec3(0.10, 0.045, 0.01);
+        vec3 bronzeHot  = vec3(0.85, 0.42, 0.12);
+        vec3 blueDark   = vec3(0.01, 0.03, 0.12);
+        vec3 blueHot    = vec3(0.10, 0.30, 0.85);
+        float k = smoothstep(0.0, 1.0, uScroll);
+        vec3 dark = mix(bronzeDark, blueDark, k);
+        vec3 hot  = mix(bronzeHot, blueHot, k);
+        vec3 col = mix(dark, hot, band * band) * 0.55;
+        float vig = smoothstep(1.4, 0.2, length(uv - 0.5) * 1.6);
+        col *= vig;
+        gl_FragColor = vec4(col, 1.0);
+      }`
+  });
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bgMaterial);
+  plane.position.z = -dist;
+  plane.renderOrder = -1;
+  plane.frustumCulled = false;
+  camera.add(plane);
+}
+createBackgroundShader();
+
+renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 2.2;
+
+scene.add(new THREE.AmbientLight('#ffffff', 0.1));
+const keyLight = new THREE.SpotLight('#ffffff', 18.0);
+keyLight.position.set(4, 6, 3);
+keyLight.angle = Math.PI / 4;
+keyLight.penumbra = 0.9;
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.width = 2048;
+keyLight.shadow.mapSize.height = 2048;
+keyLight.shadow.camera.near = 1.0;
+keyLight.shadow.camera.far = 15;
+keyLight.shadow.bias = -0.001;
+scene.add(keyLight);
+const rimLight = new THREE.DirectionalLight('#e3f2ff', 10.0);
+rimLight.position.set(-5, 3, -4);
+scene.add(rimLight);
+const fillLight = new THREE.DirectionalLight('#fff3e6', 0.8);
+fillLight.position.set(-2, -4, 2);
+scene.add(fillLight);
+
+function createSparkTexture() {
+  const c = document.createElement('canvas');
+  c.width = 16; c.height = 16;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+  g.addColorStop(0, 'rgba(255, 255, 255, 1)');
+  g.addColorStop(0.25, 'rgba(255, 255, 255, 0.85)');
+  g.addColorStop(0.6, 'rgba(255, 255, 255, 0.3)');
+  g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 16, 16);
+  return new THREE.CanvasTexture(c);
+}
+
+function createSparks() {
+  const geometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(sparkCount * 3);
+  const colors = new Float32Array(sparkCount * 3);
+  for (let i = 0; i < sparkCount; i++) {
+    positions[i*3]   = (Math.random() - 0.5) * 6.5;
+    positions[i*3+1] = (Math.random() - 0.5) * 5.0 - 0.5;
+    positions[i*3+2] = (Math.random() - 0.5) * 6.5;
+    if (Math.random() < 0.6) {
+      colors[i*3] = 1.0; colors[i*3+1] = 0.4 + Math.random() * 0.15; colors[i*3+2] = 0.05 + Math.random() * 0.1;
+    } else {
+      colors[i*3] = 0.55 + Math.random() * 0.15; colors[i*3+1] = 0.82 + Math.random() * 0.12; colors[i*3+2] = 1.0;
+    }
+    sparkData.push({
+      speedX: (Math.random() - 0.5) * 0.4,
+      speedY: 0.15 + Math.random() * 0.3,
+      speedZ: (Math.random() - 0.5) * 0.4,
+      swaySpeed: 0.5 + Math.random() * 1.5,
+      swayRadius: 0.05 + Math.random() * 0.15,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const material = new THREE.PointsMaterial({
+    size: 0.025, vertexColors: true, transparent: true, opacity: 0.85,
+    blending: THREE.AdditiveBlending, depthWrite: false, map: createSparkTexture()
+  });
+  sparkParticles = new THREE.Points(geometry, material);
+  scene.add(sparkParticles);
+}
+createSparks();
+
+function fitModel(obj) {
+  modelPivot = new THREE.Group();
+  scene.add(modelPivot);
+  modelPivot.add(obj);
+  const boxInitial = new THREE.Box3().setFromObject(obj);
+  const sizeInitial = boxInitial.getSize(new THREE.Vector3());
+  const maxDim = Math.max(sizeInitial.x, sizeInitial.y, sizeInitial.z);
+  obj.scale.setScalar(3.5 / maxDim);
+  const box = new THREE.Box3().setFromObject(obj);
+  const center = box.getCenter(new THREE.Vector3());
+  obj.position.sub(center);
+  modelPivot.position.y = -0.4;
+}
+
+function loadModel() {
+  new GLTFLoader().load(
+    ASSET_BASE_URL + '/bronze_horse.glb',
+    (gltf) => {
+      gltfModel = gltf.scene;
+      gltfModel.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+          if (child.material) {
+            child.material.roughness = 0.42;
+            child.material.metalness = 0.92;
+            child.material.flatShading = false;
+            if (child.material.map) child.material.map.anisotropy = 16;
+          }
+        }
+      });
+      if (gltf.animations && gltf.animations.length > 0) {
+        mixer = new THREE.AnimationMixer(gltfModel);
+        gltf.animations.forEach((clip) => mixer.clipAction(clip).play());
+      }
+      fitModel(gltfModel);
+    },
+    undefined,
+    () => {
+      // Fallback so the scene still works if the GLB is missing
+      const m = new THREE.Mesh(
+        new THREE.TorusKnotGeometry(0.8, 0.28, 220, 32),
+        new THREE.MeshStandardMaterial({ color: '#b87333', roughness: 0.42, metalness: 0.92 })
+      );
+      m.castShadow = m.receiveShadow = true;
+      gltfModel = m;
+      fitModel(m);
+    }
+  );
+}
+loadModel();
+
+// Slides
+const slides = [1, 2, 3, 4].map(n => document.getElementById('slide-' + n));
+const slideImg = document.getElementById('slide-2-img');
+const ranges = [[0.0, 0.2], [0.25, 0.45], [0.5, 0.7], [0.75, 1.0]];
+const dashFills = [1, 2, 3, 4].map(n => document.getElementById('dash-fill-' + n));
+
+function splitTitle(el) {
+  let idx = 0;
+  const nodes = Array.from(el.childNodes);
+  el.innerHTML = '';
+  nodes.forEach((n) => {
+    if (n.nodeType === 3) {
+      n.textContent.split(/(\s+)/).forEach((word) => {
+        if (!word) return;
+        if (/^\s+$/.test(word)) { el.appendChild(document.createTextNode(' ')); return; }
+        const w = document.createElement('span');
+        w.style.display = 'inline-block';
+        w.style.whiteSpace = 'nowrap';
+        [...word].forEach((ch) => {
+          const s = document.createElement('span');
+          s.className = 'char';
+          s.textContent = ch;
+          s.style.transitionDelay = (idx++ * 0.03) + 's';
+          w.appendChild(s);
+        });
+        el.appendChild(w);
+      });
+    } else {
+      el.appendChild(n);
+    }
+  });
+}
+document.querySelectorAll('.slide-title').forEach(splitTitle);
+
+document.querySelectorAll('.nav-link').forEach((a) => {
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    const i = parseInt(a.getAttribute('href').split('-')[1], 10) - 1;
+    const max = document.documentElement.scrollHeight - innerHeight;
+    const mid = (ranges[i][0] + ranges[i][1]) / 2;
+    scrollTo({ top: max * mid, behavior: 'smooth' });
+  });
+});
+
+// Pointer
+addEventListener('mousemove', (e) => {
+  cursorX = e.clientX; cursorY = e.clientY;
+  targetMouseX = (e.clientX / innerWidth) * 2 - 1;
+  targetMouseY = -((e.clientY / innerHeight) * 2 - 1);
+});
+const inner = document.querySelector('.cursor-inner');
+const outer = document.querySelector('.cursor-outer');
+document.querySelectorAll('a').forEach((a) => {
+  a.addEventListener('mouseenter', () => outer.classList.add('hover'));
+  a.addEventListener('mouseleave', () => outer.classList.remove('hover'));
+});
+
+addEventListener('resize', () => {
+  sizes.width = innerWidth; sizes.height = innerHeight;
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(sizes.width, sizes.height);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  shaderUniforms.uResolution.value.set(sizes.width, sizes.height);
+});
+
+const dots = [...document.querySelectorAll('.grid-line')].map((l, i) => ({
+  top: l.querySelector('.grid-dot.top'), bottom: l.querySelector('.grid-dot.bottom'), seed: i * 0.19
+}));
+
+const lerp = THREE.MathUtils.lerp;
+function tick() {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = clock.elapsedTime;
+
+  const maxScroll = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  currentScroll = lerp(currentScroll, scrollY, 0.06);
+  const progress = THREE.MathUtils.clamp(currentScroll / maxScroll, 0, 1);
+
+  mouseX = lerp(mouseX, targetMouseX, 0.05);
+  mouseY = lerp(mouseY, targetMouseY, 0.05);
+
+  // Camera: full 360° orbit
+  const angle = progress * Math.PI * 2;
+  const radius = 3.0;
+  camera.position.x = Math.sin(angle) * radius + mouseX * 0.2;
+  camera.position.z = Math.cos(angle) * radius;
+  camera.position.y = 0.2 + mouseY * 0.15 + Math.sin(progress * Math.PI) * 0.25;
+  camera.lookAt(0, -0.1, 0);
+
+  if (mixer) mixer.update(dt);
+
+  // Shader
+  shaderUniforms.uTime.value = t;
+  shaderUniforms.uScroll.value = progress;
+  shaderUniforms.uMouse.value.set(mouseX, mouseY);
+
+  // Sparks: rise, sway, recycle; scroll adds turbulence
+  if (sparkParticles) {
+    const pos = sparkParticles.geometry.attributes.position.array;
+    const turb = 1 + Math.abs(scrollY - currentScroll) * 0.01;
+    for (let i = 0; i < sparkCount; i++) {
+      const d = sparkData[i];
+      pos[i*3]   += d.speedX * dt * turb + Math.cos(t * d.swaySpeed + d.phase) * d.swayRadius * dt;
+      pos[i*3+1] += d.speedY * dt * turb;
+      pos[i*3+2] += d.speedZ * dt * turb + Math.sin(t * d.swaySpeed + d.phase) * d.swayRadius * dt;
+      if (pos[i*3+1] > 2.5) {
+        pos[i*3]   = (Math.random() - 0.5) * 6.5;
+        pos[i*3+1] = -3.0;
+        pos[i*3+2] = (Math.random() - 0.5) * 6.5;
+      }
+    }
+    sparkParticles.geometry.attributes.position.needsUpdate = true;
+  }
+
+  // Slides + story progress
+  ranges.forEach(([a, b], i) => {
+    const on = progress >= a && progress < (i === 3 ? 1.01 : b);
+    slides[i].classList.toggle('active', on);
+    const f = THREE.MathUtils.clamp((progress - a) / (b - a), 0, 1);
+    dashFills[i].style.height = (f * 100) + '%';
+  });
+  slideImg.classList.toggle('active', progress >= ranges[1][0] && progress < ranges[1][1]);
+
+  // Drifting grid dots
+  dots.forEach((d, i) => {
+    const y1 = ((progress * (1.2 + i * 0.25) + d.seed) % 1) * 100;
+    const y2 = (1 - ((progress * (0.9 + i * 0.2) + d.seed * 2) % 1)) * 100;
+    d.top.style.top = y1 + '%';
+    d.bottom.style.top = y2 + '%';
+  });
+
+  // Cursor
+  outerCursorX = lerp(outerCursorX, cursorX, 0.15);
+  outerCursorY = lerp(outerCursorY, cursorY, 0.15);
+  inner.style.left = cursorX + 'px'; inner.style.top = cursorY + 'px';
+  outer.style.left = outerCursorX + 'px'; outer.style.top = outerCursorY + 'px';
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+</body>
+</html>
